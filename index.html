@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no">
+    <meta name="description" content="A slide show viewer you can pause">
+    <title>Image Slide Show You Can Pause</title>
+
+    <style>
+        body {
+            background-color: black;
+        }
+
+        #imgCollection {
+            width: "1px";
+            height: "1px";
+        }
+    </style>
+
+</head>
+
+<body>
+    <img id="leImg" width="100%" src="1x1.png" data-pointer="0" data-mode="sequential" ontouchstart="pauseImageShow()"
+        onmousedown="pauseImageShow()" onmouseup="restartImageShow()" ontouchend="restartImageShow()">
+    <div id="imgCollection"></div>
+
+    <body>
+        <script>
+            //the images used for the slide show
+            const images = ["20230107_111858.jpg-1024x.jpg", "20230109_110940.jpg-1024x.jpg",
+                "20230107_182318.jpg-1024x.jpg",
+                "20230108_160010.jpg-1024x.jpg",
+                "20230109_111507.jpg-1024x.jpg", "20230107_114736.jpg-1024x.jpg",
+                "20230107_190542.jpg-1024x.jpg", "20230108_173223.jpg-1024x.jpg",
+                "20230109_190038.jpg-1024x.jpg", "20230107_122159.jpg-1024x.jpg",
+                "20230108_142607.jpg-1024x.jpg"
+            ];
+            //preload the images to a div in the DOM but make them not visible by shrinking them
+            images.forEach(preloadImages);
+
+            function preloadImages(im_url) {
+                let img = new Image();
+                img.src = "images/" + im_url;
+                img.style.width = "1px";
+                img.style.height = "1px";
+                img.dataset.pointer = document.getElementById("imgCollection").children.length;
+                document.getElementById("imgCollection").appendChild(img);
+            }
+
+            //an interval timeout function in milliseconds causes the image to change by swapping it to the visible img element
+            function changeImage() {
+
+                return setInterval(function () {
+                    //grab a handle to all the images
+                    const images = document.getElementById("imgCollection");
+                    const mode = document.getElementById("leImg").dataset.mode === "sequential";
+                    if (images) {
+
+                        let index;
+                        if (!mode) {
+                            //select one of the images at random
+                            index = randomIntFromInterval(0, images.children.length);
+                        } else {
+                            index=0;
+                        }
+
+                        //if the program can get an image, then ...
+                        if (images.children[index]) {
+                            //swap the visible img with the contents of the hidden one
+
+                            let pointer = document.getElementById("leImg").dataset.pointer;
+                            // console.log(pointer);//this line shows the pointer for the image that is currently shown
+                            if (mode) {
+                                pointer++;
+                                if (pointer === images.children.length) {
+                                    pointer = 0;
+                                }
+                                document.getElementById("leImg").src = images.children[pointer].src;
+                                document.getElementById("leImg").dataset.pointer = pointer;
+                            } else {
+                                document.getElementById("leImg").src = images.children[index].src;
+                                document.getElementById("leImg").dataset.pointer = images.children[index].dataset.pointer;
+                            }
+
+                        }
+
+                    }
+                }, 300); //the interval in milliseconds of the slide show changes
+
+            }
+
+            //start the slide show but keep a reference to it so that it can be removed
+            let intervalID = changeImage();
+
+            //based on user interaction, stop the slideshow
+            function pauseImageShow() {
+                clearInterval(intervalID);
+            }
+            //based on user interaction, start the slideshow
+            function restartImageShow() {
+                intervalID = changeImage();
+            }
+
+            //help function to generate a random number between two values
+            function randomIntFromInterval(min, max) {
+                return Math.floor(Math.random() * (max - min + 1) + min)
+            }
+        </script>
+
+</html>
